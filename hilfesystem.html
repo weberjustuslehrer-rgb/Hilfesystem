@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modul 5 – Hilfesysteme & Speichergrößen (Tutorial)</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#1f2430;
+      --muted:#5b6578;
+      --accent:#2f6fed;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --border:#e6e9f2;
+      --shadow: 0 10px 30px rgba(31,36,48,.10);
+      --radius: 16px;
+      --tipbg:#f1f8ff;
+      --tipbd:#cfe3ff;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:var(--bg);
+      line-height:1.45; /* globally a bit airier */
+    }
+    header{
+      padding:18px 16px;
+      background:linear-gradient(180deg, #ffffff, #f7f9ff);
+      border-bottom:1px solid var(--border);
+      position:sticky; top:0; z-index:10;
+    }
+    .wrap{ max-width:980px; margin:0 auto; }
+    h1{ font-size:18px; margin:0 0 6px 0; }
+    .sub{ color:var(--muted); font-size:13px; line-height:1.45; }
+    .row{ display:flex; gap:14px; flex-wrap:wrap; margin:16px auto; padding:0 16px; }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+    .left{ flex: 1 1 520px; min-width: 320px; }
+    .right{ flex: 1 1 320px; min-width: 280px; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px 10px;
+      background:#fff;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    /* KBD: prevent overlap, make it airy */
+    .kbd{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:12px;
+      padding:3px 8px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#fff;
+      color:var(--text);
+      white-space:nowrap;
+      line-height:1.2;
+      vertical-align:baseline;
+      margin:0 2px; /* spacing so they don't collide */
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
+    .btn:active{ transform:translateY(1px); }
+    .muted{ color:var(--muted); font-size:13px; line-height:1.55; }
+    .hr{ height:1px; background:var(--border); margin:12px 0; }
+    .task{
+      border:1px dashed #cfd6e6;
+      border-radius:14px;
+      padding:12px;
+      margin:12px 0;
+      background:#fbfcff;
+    }
+    .task h3{ margin:0 0 6px 0; font-size:14px; line-height:1.35; }
+    .task p{ margin:0 0 10px 0; color:var(--muted); font-size:13px; line-height:1.6; }
+    .status{
+      display:flex; align-items:center; gap:8px;
+      font-size:13px; color:var(--muted);
+      line-height:1.5;
+      margin-top:10px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:999px; background:#cbd5e1;
+      flex:0 0 auto;
+    }
+    .dot.ok{ background:var(--ok); }
+    .dot.warn{ background:var(--warn); }
+    .dot.bad{ background:var(--bad); }
+    .input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      outline:none;
+      font-size:14px;
+      background:#fff;
+      line-height:1.25;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width:720px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .progress{
+      height:10px;
+      background:#e9edf7;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid var(--border);
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background:var(--accent);
+      transition: width .25s ease;
+    }
+
+    .callout{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      background:#fbfcff;
+    }
+    .callout h4{ margin:0 0 6px 0; font-size:14px; line-height:1.35; }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:12.5px;
+      background:#f7f7ff;
+      border:1px solid var(--border);
+      padding:10px;
+      border-radius:14px;
+      overflow:auto;
+      white-space:pre;
+      line-height:1.45;
+    }
+    .tiny{ font-size:12px; color:var(--muted); line-height:1.55; }
+    .badge{
+      display:inline-flex; align-items:center;
+      padding:3px 8px;
+      border-radius:999px;
+      background:#eef4ff;
+      color:#1d4ed8;
+      font-size:12px;
+      border:1px solid #dbe7ff;
+      margin-left:6px;
+      line-height:1.2;
+    }
+
+    /* Tip box */
+    .tip{
+      border:1px solid var(--tipbd);
+      background:var(--tipbg);
+      border-radius:14px;
+      padding:10px 12px;
+      margin:10px 0 0 0;
+      color:#113a7a;
+      font-size:13px;
+      line-height:1.7; /* IMPORTANT: more air so kbd never overlaps */
+    }
+    .tip strong{ color:#0b2f66; }
+    .tip .kbd{ border-color:#b8d3ff; }
+
+    /* MODAL (Help) - fixed + scrollable body */
+    .overlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.35);
+      display:none;
+      align-items:center; justify-content:center;
+      padding:18px;
+      z-index:50;
+    }
+    .modal{
+      width:min(900px, 100%);
+      max-height: min(86vh, 820px);
+      background:#fff;
+      border-radius:18px;
+      border:1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .modalTop{
+      background:#fff;
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      position:sticky;
+      top:0;
+      z-index:2;
+    }
+    .modalBody{
+      padding:14px 16px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .helpgrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width:720px){
+      .helpgrid{ grid-template-columns: 1fr; }
+    }
+
+    /* PRINT: clean worksheet-style output */
+    @media print{
+		.mono{
+		    white-space: pre-wrap !important;  /* darf umbrechen */
+		    overflow: visible !important;      /* nichts abschneiden */
+		    word-break: break-word !important; /* notfalls Wortumbruch */
+		  }
+      @page { margin: 14mm; }
+
+      header, .right, #openHelpBtn, #openHelpBtn2, .btn, .progress { display:none !important; }
+
+      body{ background:#fff; color:#000; }
+      .row{ padding:0; margin:0; }
+      .card{ box-shadow:none !important; border:0 !important; padding:0 !important; }
+      .left{ min-width:auto; }
+
+      /* Make tasks look like a neat worksheet */
+      .task{
+        background:#fff !important;
+        border:1px solid #000 !important;
+        border-radius:0 !important;
+        padding:10px 10px !important;
+        margin:10px 0 !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .tip{
+        background:#fff !important;
+        border:1px solid #000 !important;
+        border-radius:0 !important;
+        color:#000 !important;
+        margin-top:8px !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .hr{ background:#000 !important; }
+
+      /* Hide status dots/messages in print (optional: uncomment to keep)
+      .status{ display:none !important; }
+      */
+
+      /* Inputs as blank lines */
+      input{
+        border:0 !important;
+        border-bottom:1px solid #000 !important;
+        border-radius:0 !important;
+        padding:6px 0 !important;
+        background:#fff !important;
+      }
+      label.tiny{ color:#000 !important; }
+
+      /* Avoid splitting grids awkwardly */
+      .grid{ break-inside: avoid; page-break-inside: avoid; }
+
+      /* Never print the overlay */
+      .overlay{ display:none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Hilfesysteme im Browser + Speichergrößen</h1>
+    <div class="sub">
+      Ziel: Du nutzt Hilfen & Shortcuts, um Infos zu finden und arbeitest dabei am Thema Speicher und Übertragungsrate.
+      <span class="pill" style="margin-left:10px;">
+        Hilfe öffnen: <span class="kbd">F1</span> (falls es nicht klappt: Button rechts)
+      </span>
+    </div>
+    <div style="margin-top:10px;" class="progress" aria-label="Fortschritt">
+      <div class="bar" id="bar"></div>
+    </div>
+  </div>
+</header>
+
+<div class="row wrap">
+  <section class="card left" aria-label="Aufgaben">
+    <div class="status" style="justify-content:space-between;">
+      <div><strong>Arbeitsmodus:</strong> Schritt für Schritt.</div>
+      <div class="pill">Tipp: <span class="kbd">Strg/Cmd</span> + <span class="kbd">F</span> findet Wörter auf der Seite.</div>
+    </div>
+
+    <div class="tip">
+      <strong>Pro-Tipp (Grundlagen):</strong>
+      Markiere Text → <span class="kbd">Strg/Cmd</span> + <span class="kbd">C</span> kopieren,
+      <span class="kbd">Strg/Cmd</span> + <span class="kbd">V</span> einfügen.
+      Wenn du dich vertippst: <span class="kbd">Strg/Cmd</span> + <span class="kbd">Z</span> macht rückgängig.
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- TASK 1 -->
+    <div class="task" id="t1">
+      <h3>Aufgabe 1: Browser-Hilfe nutzen <span class="badge">Shortcut</span></h3>
+      <p>Drücke <span class="kbd">F1</span>. Es soll ein Hilfefenster erscheinen. Lies dort den Abschnitt „Speichergrößen: Merksatz“.</p>
+
+      <div class="grid">
+        <div>
+          <label class="tiny" for="a1">Trage den Merksatz exakt ein:</label>
+          <input class="input" id="a1" placeholder="Merksatz aus der Hilfe…" />
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <button class="btn" id="openHelpBtn">Hilfe öffnen</button>
+          <button class="btn primary" id="check1">Prüfen</button>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Pro-Tipp:</strong> Du kannst den Merksatz in der Hilfe markieren und mit
+        <span class="kbd">Strg/Cmd</span>+<span class="kbd">C</span> kopieren und hier mit
+        <span class="kbd">Strg/Cmd</span>+<span class="kbd">V</span> einfügen.
+      </div>
+
+      <div class="status">
+        <span class="dot" id="s1"></span>
+        <span id="m1">Noch nicht geprüft.</span>
+      </div>
+    </div>
+
+    <!-- TASK 2 -->
+    <div class="task" id="t2">
+      <h3>Aufgabe 2: Im Browser suchen <span class="badge">Browser</span></h3>
+      <p>Nutze die Browser-Suche und finde auf dieser Seite das Wort <strong>CODEWORT:</strong>. Daneben steht ein geheimes Wort (nur 1 Wort!). Trage es hier ein.</p>
+
+      <div class="grid">
+        <div>
+          <label class="tiny" for="a2">Geheimes Wort:</label>
+          <input class="input" id="a2" placeholder="Geheimes Wort…" />
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <button class="btn primary" id="check2">Prüfen</button>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Pro-Tipp:</strong>
+        <span class="kbd">Strg/Cmd</span> + <span class="kbd">F</span> öffnen → Suchwort eingeben → mit <span class="kbd">Enter</span> zum nächsten Treffer.
+      </div>
+
+      <div class="status">
+        <span class="dot" id="s2"></span>
+        <span id="m2">Noch nicht geprüft.</span>
+      </div>
+    </div>
+
+    <!-- TASK 3 -->
+    <div class="task" id="t3">
+      <h3>Aufgabe 3: Von Medium zur Größe <span class="badge">Inhalt</span></h3>
+      <p>Nutze die Infokästen rechts und die Hilfe (F1), um die folgenden Größen abzuschätzen. Runde sinnvoll.</p>
+
+      <div class="grid">
+        <div>
+          <label class="tiny" for="a3a">a) ASCII: 2000 Zeichen Text (1 Zeichen ≈ 1 Byte). Wie viele <strong>KB</strong>?</label>
+          <input class="input" id="a3a" placeholder="z. B. 30 KB" />
+        </div>
+        <div>
+          <label class="tiny" for="a3b">b) PBM: 100×100 Pixel, 1 Bit pro Pixel. Wie viele <strong>Bytes</strong>?</label>
+          <input class="input" id="a3b" placeholder="z. B. 500 Byte" />
+        </div>
+        <div>
+          <label class="tiny" for="a3c">c) PGM: 100×100 Pixel, 1 Byte pro Pixel. Wie viele <strong>KB</strong>?</label>
+          <input class="input" id="a3c" placeholder="z. B. 40 KB" />
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <button class="btn primary" id="check3">Prüfen</button>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Pro-Tipp:</strong> Wenn du eine Seite neu laden willst:
+        <span class="kbd">Strg/Cmd</span> + <span class="kbd">R</span>.
+        (Achtung: Dann gehen Eingaben verloren.)
+      </div>
+
+      <div class="status">
+        <span class="dot" id="s3"></span>
+        <span id="m3">Noch nicht geprüft.</span>
+      </div>
+    </div>
+
+    <!-- TASK 4 -->
+    <div class="task" id="t4">
+      <h3>Aufgabe 4: Übertragungsrate <span class="badge">Mbit/s</span></h3>
+      <p>Ein Download hat <strong>1 GB</strong>. Deine Leitung hat <strong>80 Mbit/s</strong>.
+         Nutze die Hilfe (F1) für den Umrechnungsweg und schätze die Downloadzeit in Minuten.</p>
+
+      <div class="grid">
+        <div>
+          <label class="tiny" for="a4">Downloadzeit (ungefähr):</label>
+          <input class="input" id="a4" placeholder="z. B. 8 Minuten" />
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <button class="btn primary" id="check4">Prüfen</button>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Pro-Tipp:</strong> Speichern ist nicht überall gleich, aber oft gilt:
+        <span class="kbd">Strg/Cmd</span> + <span class="kbd">S</span>.
+      </div>
+
+      <div class="status">
+        <span class="dot" id="s4"></span>
+        <span id="m4">Noch nicht geprüft.</span>
+      </div>
+    </div>
+
+    <!-- TASK 5 PRINT -->
+    <div class="task" id="t5">
+      <h3>Aufgabe 5: Als PDF speichern <span class="badge">Shortcut</span></h3>
+      <p>Drucke diese Seite als PDF und speichere sie in deinem Ordner <strong>Informationen und Daten</strong> als Datei:
+        <strong>05_Hilfesysteme_Protokoll.pdf</strong></p>
+
+      <div class="tip">
+        <strong>Shortcut:</strong> <span class="kbd">Strg/Cmd</span> + <span class="kbd">P</span> öffnet den Druckdialog.
+        Wähle dann als Ziel <em>„Als PDF speichern“</em> (oder „Microsoft Print to PDF“).
+      </div>
+
+      <div class="grid" style="margin-top:10px;">
+        <div>
+          <label class="tiny" for="a5">Trage den Dateinamen ein, den du gespeichert hast:</label>
+          <input class="input" id="a5" placeholder="05_Hilfesysteme_Protokoll.pdf" />
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <button class="btn primary" id="check5">Prüfen</button>
+        </div>
+      </div>
+
+      <div class="status">
+        <span class="dot" id="s5"></span>
+        <span id="m5">Noch nicht geprüft.</span>
+      </div>
+    </div>
+
+    <!-- Hidden content for Ctrl/Cmd+F -->
+    <div class="tiny" style="margin-top:18px; color:#94a3b8;">
+      Hinweis: Du kannst auch gezielt nach <span class="kbd">Byte</span>, <span class="kbd">Bit</span> oder <span class="kbd">Mbit/s</span> suchen.
+    </div>
+    <div class="tiny" style="margin-top:8px;">
+      <span style="opacity:.04; user-select:text;">CODEWORT: ORDNUNG</span>
+      <span style="opacity:.08; user-select:text;">(absichtlich schwer zu sehen – du sollst es per Suche finden)</span>
+    </div>
+
+  </section>
+
+  <aside class="card right" aria-label="Info">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <strong>Infokarten</strong>
+      <button class="btn" id="openHelpBtn2">Hilfe (F1)</button>
+    </div>
+    <div class="hr"></div>
+
+    <div class="callout">
+      <h4>1) Von Text/Bild zur Größe</h4>
+      <div class="muted">
+        <ul style="margin:8px 0 0 16px; line-height:1.7;">
+          <li><strong>ASCII:</strong> 1 Zeichen ≈ 1 Byte (vereinfachend)</li>
+          <li><strong>PBM (S/W):</strong> 1 Pixel ≈ 1 Bit</li>
+          <li><strong>PGM (Graustufen):</strong> oft 1 Pixel ≈ 1 Byte</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:10px;">
+      <h4>2) Schnelle Umrechnung</h4>
+      <div class="muted">
+        <div style="margin-top:6px;">
+          <span class="kbd">8 Bit</span> = <span class="kbd">1 Byte</span>
+        </div>
+        <div style="margin-top:10px; line-height:1.7;">
+          <span class="kbd">1 KB</span> ≈ <span class="kbd">1000 Byte</span><br/>
+          <span class="kbd">1 MB</span> ≈ <span class="kbd">1000 KB</span><br/>
+          <span class="kbd">1 GB</span> ≈ <span class="kbd">1000 MB</span>
+        </div>
+        <div class="tiny" style="margin-top:6px;">
+          (Binärpräfixe wie KiB sind als Randnotiz in der Hilfe erklärt.)
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:10px;">
+      <h4>3) Übertragungsrate</h4>
+      <div class="muted">
+        <div>Internet wird oft in <strong>Mbit/s</strong> angegeben.</div>
+        <div style="margin-top:8px;">
+          Um grob in <strong>MB/s</strong> zu kommen:
+          <div class="mono" style="margin-top:8px;">MB/s ≈ (Mbit/s) ÷ 8</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:10px;">
+      <h4>Shortcut-Übersicht</h4>
+      <div class="muted">
+        <ul style="margin:8px 0 0 16px; line-height:1.7;">
+          <li><span class="kbd">F1</span> Hilfe</li>
+          <li><span class="kbd">Strg/Cmd</span>+<span class="kbd">F</span> Suchen</li>
+          <li><span class="kbd">Strg/Cmd</span>+<span class="kbd">C</span>/<span class="kbd">V</span> Kopieren/Einfügen</li>
+          <li><span class="kbd">Strg/Cmd</span>+<span class="kbd">P</span> Drucken → PDF</li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- HELP MODAL -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Hilfesystem">
+  <div class="modal">
+    <div class="modalTop">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">
+        <div>
+          <strong>Hilfesystem (F1)</strong>
+          <div class="sub">Merksätze, Beispiele und Umrechnungswege.</div>
+        </div>
+        <button class="btn" id="closeHelp">Schließen</button>
+      </div>
+    </div>
+
+    <div class="modalBody">
+      <div class="helpgrid">
+        <div class="callout">
+          <h4>Speichergrößen: Merksatz</h4>
+          <div class="mono">Im Computer gibt es eigene Einheiten.</div>
+          <div class="tiny" style="margin-top:8px;">(Das ist der Satz für Aufgabe 1.)</div>
+        </div>
+
+        <div class="callout">
+          <h4>Beispiel: ASCII → Größe</h4>
+          <div class="muted">2000 Zeichen ≈ 2000 Byte ≈ 2 KB (weil 1 KB ≈ 1000 Byte)</div>
+        </div>
+
+        <div class="callout">
+          <h4>Beispiel: PBM (1 Bit pro Pixel)</h4>
+          <div class="muted">100×100 Pixel = 10 000 Pixel → 10 000 Bit → 10 000 ÷ 8 = 1250 Byte ≈ 1,25 KB</div>
+        </div>
+
+        <div class="callout">
+          <h4>Beispiel: PGM (1 Byte pro Pixel)</h4>
+          <div class="muted">100×100 Pixel = 10 000 Pixel → 10 000 Byte ≈ 10 KB</div>
+        </div>
+
+        <div class="callout">
+          <h4>Übertragungsrate: Weg in 3 Schritten</h4>
+          <div class="mono">1) Mbit/s in MB/s:  MB/s ≈ (Mbit/s) ÷ 8
+2) Größe in MB:       1 GB ≈ 1000 MB
+3) Zeit:              Zeit ≈ Größe ÷ Geschwindigkeit</div>
+          <div class="muted" style="margin-top:8px;">
+            Beispiel: 80 Mbit/s → ca. 10 MB/s. 1 GB ≈ 1000 MB. Zeit ≈ 1000 ÷ 10 = 100 s ≈ 1,7 min.
+          </div>
+        </div>
+
+        <div class="callout">
+          <h4>Randnotiz: SI vs. Binär (kurz)</h4>
+          <div class="muted">
+            Hersteller nutzen oft <strong>1000</strong>er-Schritte (KB/MB/GB). Computer zeigen manchmal <strong>1024</strong>er-Schritte (KiB/MiB/GiB).
+            Für heute reicht: <strong>Wir rechnen grob mit 1000</strong>.
+          </div>
+        </div>
+
+        <div class="callout">
+          <h4>Extra: Schnelle Shortcuts</h4>
+          <div class="muted">
+            <ul style="margin:8px 0 0 16px; line-height:1.7;">
+              <li><span class="kbd">Strg/Cmd</span>+<span class="kbd">C</span> kopieren, <span class="kbd">V</span> einfügen</li>
+              <li><span class="kbd">Strg/Cmd</span>+<span class="kbd">Z</span> rückgängig</li>
+              <li><span class="kbd">Strg/Cmd</span>+<span class="kbd">F</span> suchen</li>
+              <li><span class="kbd">Strg/Cmd</span>+<span class="kbd">P</span> als PDF speichern</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+      <div class="tiny">
+        Hinweis: Wenn <span class="kbd">F1</span> im Browser nicht klappt, nutze den Button „Hilfe öffnen“.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const overlay = document.getElementById('overlay');
+  const openHelp = () => overlay.style.display = 'flex';
+  const closeHelp = () => overlay.style.display = 'none';
+
+  document.getElementById('openHelpBtn').addEventListener('click', openHelp);
+  document.getElementById('openHelpBtn2').addEventListener('click', openHelp);
+  document.getElementById('closeHelp').addEventListener('click', closeHelp);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeHelp(); });
+
+  // Capture F1 if possible
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'F1') { e.preventDefault(); openHelp(); }
+    if (e.key === 'Escape' && overlay.style.display === 'flex') closeHelp();
+  }, {capture:true});
+
+  // Progress tracking (no final "code" output)
+  const state = { t1:false, t2:false, t3:false, t4:false, t5:false };
+  const bar = document.getElementById('bar');
+
+  function updateProgress(){
+    const done = Object.values(state).filter(Boolean).length;
+    const pct = Math.round(done / 5 * 100);
+    bar.style.width = pct + '%';
+  }
+  function setStatus(n, ok, msg){
+    const dot = document.getElementById('s'+n);
+    const m = document.getElementById('m'+n);
+    dot.classList.remove('ok','warn','bad');
+    dot.classList.add(ok ? 'ok' : 'warn');
+    m.textContent = msg;
+  }
+
+  // TASK 1 check
+  const merksatz = "Im Computer gibt es eigene Einheiten.";
+  document.getElementById('check1').addEventListener('click', ()=>{
+    const v = (document.getElementById('a1').value || "").trim();
+    if(v === merksatz){
+      state.t1 = true;
+      setStatus(1, true, "Richtig.");
+    } else {
+      state.t1 = false;
+      setStatus(1, false, "Noch nicht. Öffne die Hilfe (F1) und übernimm den Merksatz exakt.");
+    }
+    updateProgress();
+  });
+
+  // TASK 2 check
+  document.getElementById('check2').addEventListener('click', ()=>{
+    const v = (document.getElementById('a2').value || "").trim().toUpperCase();
+    if(v === "ORDNUNG"){
+      state.t2 = true;
+      setStatus(2, true, "Gefunden!");
+    } else {
+      state.t2 = false;
+      setStatus(2, false, "Nicht gefunden. Nutze Strg/Cmd+F und suche nach „CODEWORT:“");
+    }
+    updateProgress();
+  });
+
+  // TASK 3 check (lenient)
+  function parseNumberish(txt){
+    const t = (txt || "").replace(",", ".").toLowerCase();
+    const n = parseFloat(t.match(/[\d.]+/)?.[0] || "NaN");
+    return Number.isFinite(n) ? n : null;
+  }
+  document.getElementById('check3').addEventListener('click', ()=>{
+    const na = parseNumberish(document.getElementById('a3a').value); // ~2 KB
+    const nb = parseNumberish(document.getElementById('a3b').value); // ~1250 Byte
+    const nc = parseNumberish(document.getElementById('a3c').value); // ~10 KB
+
+    const oka = na !== null && na >= 1.9 && na <= 2.1;
+    const okb = nb !== null && nb >= 1230 && nb <= 1270;
+    const okc = nc !== null && nc >= 9 && nc <= 11;
+
+    if(oka && okb && okc){
+      state.t3 = true;
+      setStatus(3, true, "Passt.");
+    } else {
+      state.t3 = false;
+      setStatus(3, false, "Noch nicht ganz. Nutze die Hilfe (F1) und die Infokarten rechts.");
+    }
+    updateProgress();
+  });
+
+  // TASK 4 check (lenient)
+  document.getElementById('check4').addEventListener('click', ()=>{
+    const n = parseNumberish((document.getElementById('a4').value || "").toLowerCase());
+    const ok = n !== null && n >= 1.8 && n <= 2.2;
+    if(ok){
+      state.t4 = true;
+      setStatus(4, true, "Gute Schätzung.");
+    } else {
+      state.t4 = false;
+      setStatus(4, false, "Nutze die Hilfe: 80 Mbit/s ≈ 10 MB/s. 1 GB ≈ 1000 MB.");
+    }
+    updateProgress();
+  });
+
+  // TASK 5 check (filename)
+  document.getElementById('check5').addEventListener('click', ()=>{
+    const v = (document.getElementById('a5').value || "").trim();
+    if(v === "05_Hilfesysteme_Protokoll.pdf"){
+      state.t5 = true;
+      setStatus(5, true, "Ok.");
+    } else {
+      state.t5 = false;
+      setStatus(5, false, "Bitte genau diesen Dateinamen eintragen: 05_Hilfesysteme_Protokoll.pdf");
+    }
+    updateProgress();
+  });
+
+  updateProgress();
+</script>
+
+</body>
+</html>
